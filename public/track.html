@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EZED NYANUGA TECH - Tracker</title>
+  <style>
+    body { font-family: system-ui; padding: 20px; text-align: center; background: #fafafa; margin: 0; }
+    .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 400px; margin: 40px auto; }
+    .status { margin-top: 15px; padding: 12px; border-radius: 8px; background: #e8f5e9; font-size: 14px; }
+    .error { background: #ffebee; color: #c62828; }
+    button { background: #1976d2; color: white; border: none; padding: 14px 28px; border-radius: 8px; font-size: 16px; cursor: pointer; width: 100%; }
+    button:disabled { background: #90caf9; cursor: not-allowed; }
+    h2 { margin: 0 0 5px 0; }
+    .brand { color: #1976d2; font-weight: 700; font-size: 22px; }
+    .warning { font-size: 13px; color: #666; margin-top: 15px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2 class="brand">EZED NYANUGA TECH</h2>
+    <p>📍 Device Tracker</p>
+    <p class="warning">Keep this tab open. Closing it stops tracking.</p>
+    <button id="startBtn">Start Tracking</button>
+    <div id="status" class="status">Tap Start and allow location permission</div>
+  </div>
+
+  <script>
+    const statusEl = document.getElementById('status');
+    const btn = document.getElementById('startBtn');
+    let intervalId = null;
+
+    function sendLocation() {
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        const data = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          acc: Math.round(pos.coords.accuracy)
+        };
+        try {
+          await fetch('/update', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+          });
+          statusEl.textContent = `Sent: ${new Date().toLocaleTimeString()} | ${data.lat.toFixed(4)}, ${data.lng.toFixed(4)}`;
+          statusEl.className = 'status';
+        } catch (e) {
+          statusEl.textContent = 'Network error. Will retry...';
+          statusEl.className = 'status error';
+        }
+      }, (err) => {
+        statusEl.textContent = 'GPS error: ' + err.message;
+        statusEl.className = 'status error';
+      }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+    }
+
+    btn.onclick = () => {
+      if (intervalId) return;
+      btn.textContent = 'Tracking Active...';
+      btn.disabled = true;
+      sendLocation();
+      intervalId = setInterval(sendLocation, 30000);
+    };
+  </script>
+</body>
+</html>
