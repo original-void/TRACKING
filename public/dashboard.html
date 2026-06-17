@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EZED NYANUGA TECH - Dashboard</title>
+  <style>
+    body { font-family: system-ui; padding: 20px; max-width: 500px; margin: 0 auto; background: #fafafa; }
+    .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    #mapLink { display: inline-block; margin-top: 15px; background: #25D366; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; }
+    .brand { color: #1976d2; font-weight: 700; margin: 0 0 10px 0; font-size: 22px; }
+    h3 { margin: 0 0 15px 0; color: #333; }
+    p { margin: 8px 0; color: #555; }
+    .nodata { color: #d32f2f; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2 class="brand">EZED NYANUGA TECH</h2>
+    <h3>Last Known Location</h3>
+    <div id="info">Loading...</div>
+  </div>
+  <script>
+    async function load() {
+      try {
+        const res = await fetch('/last');
+        const data = await res.json();
+        const info = document.getElementById('info');
+        if (!data.lat) {
+          info.innerHTML = '<p class="nodata">No location received yet. Make sure the tracker is running on your phone.</p>';
+          return;
+        }
+        const time = new Date(data.time).toLocaleString();
+        info.innerHTML = `
+          <p><b>Latitude:</b> ${data.lat}</p>
+          <p><b>Longitude:</b> ${data.lng}</p>
+          <p><b>Accuracy:</b> ~${data.acc} meters</p>
+          <p><b>Last Update:</b> ${time}</p>
+          <a id="mapLink" href="https://www.google.com/maps?q=${data.lat},${data.lng}" target="_blank">Open in Google Maps</a>
+        `;
+      } catch (e) {
+        document.getElementById('info').innerHTML = '<p class="nodata">Error loading data</p>';
+      }
+    }
+    load();
+    setInterval(load, 10000);
+  </script>
+</body>
+</html>
