@@ -50,9 +50,14 @@
           statusEl.className = 'status error';
         }
       }, (err) => {
-        statusEl.textContent = 'GPS error: ' + err.message;
+        statusEl.textContent = `GPS error: ${err.message} - Retrying in 5s...`;
         statusEl.className = 'status error';
-      }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+        setTimeout(sendLocation, 5000); // Auto retry after 5 seconds
+      }, { 
+        enableHighAccuracy: true, 
+        timeout: 30000,  // 30 second timeout instead of 10
+        maximumAge: 0 
+      });
     }
 
     btn.onclick = () => {
@@ -60,7 +65,7 @@
       btn.textContent = 'Tracking Active...';
       btn.disabled = true;
       sendLocation();
-      intervalId = setInterval(sendLocation, 30000);
+      intervalId = setInterval(sendLocation, 30000); // Send every 30s
     };
   </script>
 </body>
