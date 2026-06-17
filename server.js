@@ -1,7 +1,9 @@
 const express = require('express');
+const path = require('path');
 const app = express();
+
 app.use(express.json());
-app.use(express.static('public')); // serves html files
+app.use(express.static('public'));
 
 let lastLocation = { lat: null, lng: null, time: null, acc: null };
 
@@ -18,5 +20,10 @@ app.get('/last', (req, res) => {
   res.json(lastLocation);
 });
 
+// Redirect root to dashboard
+app.get('/', (req, res) => {
+  res.redirect('/dashboard.html');
+});
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Running on port ${PORT}`));
+app.listen(PORT, () => console.log(`EZED NYANUGA TECH running on port ${PORT}`));
